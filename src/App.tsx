@@ -1,39 +1,70 @@
-import React from 'react';
+import React, { Component } from 'react';
 import logo from './logo.svg';
 import styles from './App.module.scss';
 import MaterialButton from "./components/MaterialButton/MaterialButton";
 import MaterialSwitch from "./components/MaterialSwitch/MaterialSwitch";
-import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
+import { Route, Switch, withRouter, Redirect, Link, NavLink } from 'react-router-dom';
+import Auth from "./containers/Auth/Auth";
+import Search from "./containers/Search/Search";
+import Results from './containers/Results/Results';
 
-const App: React.FC = () => {
-  return (
-    <div className={styles.App}>
-      <header className={styles.Header}>
-        <img src={logo} className={styles.Logo} alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className={styles.Link}
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <h1 className={styles.Name}>My name is Myroslav</h1>
+type AppProps = {
+  isAuthenticated?: boolean,
+}
+
+type AppState = {
+  isAuthenticated?: boolean,
+  shit: boolean,
+}
+
+class App extends Component<AppProps, AppState> {
+  state = {
+    isAuthenticated: false,
+    shit: true,
+  };
+
+  changeAuthHandler = (): void => {
+    this.setState(({ isAuthenticated }) => ({ isAuthenticated: !isAuthenticated }));
+  }
+
+  render() {
+    const { isAuthenticated } = this.state;
+    let navigation = (
+      <nav>
+        <NavLink to='/auth'>Authentication</NavLink>
+      </nav>
+    )
+    let routes = (
+      <Switch>
+        <Route path='/auth' component={Auth}/>
+        <Redirect to='/auth' />
+      </Switch>
+    );
+
+    if (isAuthenticated) {
+      routes = (
         <Switch>
-          <Route path='/auth' component={Auth}/>
-          <Route path='/'/>
-          <Route path='/results'/>
-
+          <Route path='/search' component={Search}/>
+          <Route path='/results' component={Results}/>
+          <Redirect to='/search' />
         </Switch>
+      );
+      navigation = (
+        <nav>
+          <NavLink to='/search'>Search</NavLink>
+          <NavLink to='/results'>Results</NavLink>
+        </nav>
+      )
+    }
 
-        <MaterialButton text="Shit button" />
-        <MaterialSwitch />
-      </header>
-    </div>
-  );
+    return (
+      <div className={styles.App}>
+        <button onClick={this.changeAuthHandler}>Change auth</button>
+        {navigation}
+        {routes}
+      </div>
+    );
+  }
 };
 
 export default App;
